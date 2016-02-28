@@ -21,6 +21,21 @@
 
 2. Navigate to tournament_nico folder: cd /vagrant/tournament_nico
 
+3. Create database and tables for the project:
+
+```
+   psql
+
+   CREATE DATABASE tournament;
+
+   \c tournament
+
+   \i tournament.sql
+```
+
+
+
+
 
 
 # Resources

@@ -62,6 +62,7 @@ def testStandingsBeforeMatches():
     if len(standings[0]) != 4:
         raise ValueError("Each playerStandings row should have four columns.")
     [(id1, name1, wins1, matches1), (id2, name2, wins2, matches2)] = standings
+
     if matches1 != 0 or matches2 != 0 or wins1 != 0 or wins2 != 0:
         raise ValueError(
             "Newly registered players should have no matches or wins.")
@@ -154,8 +155,8 @@ def testPairings():
 
 
 if __name__ == '__main__':
-    testCount()
+    # testCount()
     # testStandingsBeforeMatches()
-    # testReportMatches()
+    testReportMatches()
     # testPairings()
     print "Success!  All tests pass!"

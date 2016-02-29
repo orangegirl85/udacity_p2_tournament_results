@@ -69,17 +69,20 @@ def playerStandings():
         matches: the number of matches the player has played
     """
 
-    query = '''SELECT p.id, p.name,
-            count(m.winner) as wins
-            FROM players as p LEFT JOIN matches m
-            ON p.id = m.winner
-            '''
+    query = '''
+        SELECT p.id, p.name, p.wins, m.matches
+        FROM view_player_id_name_won_matches as p, view_player_matches as m
+        WHERE p.id = m.id
+        ORDER BY p.id
+    '''
     db_conn = connect()
     cursor = db_conn.cursor()
     cursor.execute(query)
     results = cursor.fetchall()
-    players = [{'id': str(row[0]), 'name': str(row[1]), 'wins': str(row[2])} for row in results]
-    return players
+    #print results
+    #players = [{'id': str(row[0]), 'name': str(row[1]), 'wins': str(row[2]), 'matches': 0} for row in results]
+    #print players
+    return results
 
 
 def reportMatch(winner, loser):

@@ -79,9 +79,6 @@ def playerStandings():
     cursor = db_conn.cursor()
     cursor.execute(query)
     results = cursor.fetchall()
-    #print results
-    #players = [{'id': str(row[0]), 'name': str(row[1]), 'wins': str(row[2]), 'matches': 0} for row in results]
-    #print players
     return results
 
 
@@ -114,3 +111,39 @@ def swissPairings():
         id2: the second player's unique id
         name2: the second player's name
     """
+
+    query = '''
+        SELECT id, name
+        FROM
+        (SELECT id, name, row_number() OVER (ORDER BY wins DESC) as rnum
+        FROM view_player_id_name_won_matches) q
+
+        WHERE rnum %2 = 1
+
+    '''
+    db_conn = connect()
+    cursor = db_conn.cursor()
+    cursor.execute(query)
+    odd_row_results = cursor.fetchall()
+
+    query = '''
+        SELECT id, name
+        FROM
+        (SELECT id, name, row_number() OVER (ORDER BY wins DESC) as rnum
+        FROM view_player_id_name_won_matches) q
+
+        WHERE rnum %2 = 0
+
+    '''
+    db_conn = connect()
+    cursor = db_conn.cursor()
+    cursor.execute(query)
+    even_row_results = cursor.fetchall()
+
+    results = []
+    i = 0
+    while i < len(odd_row_results):
+        results.append(odd_row_results[i] + even_row_results[i])
+        i += 1
+
+    return results

@@ -42,6 +42,9 @@
 ----------
 1. Intro to Relational Databases - Udacity course
 
+2. swissPairings functionality inspired by
+  `http://stackoverflow.com/questions/19218458/how-to-retrieve-even-rows-in-a-table`
+
 
 # Extras
 ----------

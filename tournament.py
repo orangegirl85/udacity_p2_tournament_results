@@ -73,7 +73,7 @@ def playerStandings():
         SELECT p.id, p.name, p.wins, m.matches
         FROM view_player_id_name_won_matches as p, view_player_matches as m
         WHERE p.id = m.id
-        ORDER BY p.id
+        ORDER BY p.wins desc
     '''
     db_conn = connect()
     cursor = db_conn.cursor()

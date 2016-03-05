@@ -8,6 +8,10 @@
 
 from tournament import *
 
+import math
+
+PLAYERS = 16
+
 
 def testCount():
     """
@@ -154,9 +158,67 @@ def testPairings():
     print "10. After one match, players with one win are properly paired."
 
 
+def showEntireSwissTournament():
+    """
+    Show each round in a swiss tournament
+    """
+    deleteMatches()
+    deletePlayers()
+
+    i = 0
+    while i < PLAYERS:
+        registerPlayer("Player " + str(i + 1))
+        i += 1
+    print 'Stats before tournament:'
+    stats()
+
+    rounds = math.log(PLAYERS) / math.log(2)
+    i = 0
+    while i < int(rounds):
+        pairings = swissPairings()
+        bb = {}
+
+        j = 0
+        z = 0
+        while j < PLAYERS:
+            (bb['pid' + str(j)], bb['pname' + str(j)], bb['pid' + str(j + 1)], bb['pname' + str(j + 1)]) = pairings[z]
+            reportMatch(bb['pid' + str(j)], bb['pid' + str(j + 1)])
+            j += 2
+            z += 1
+
+        print ''
+        print 'Stats after round:' + str(i + 1)
+        first_player = stats()
+        i += 1
+
+    print "The winner is: " + first_player
+
+
+def stats():
+    standings = playerStandings()
+    bb = {}
+
+    j = 0
+    while j < PLAYERS:
+        (bb['id' + str(j)], bb['name' + str(j)], bb['wins' + str(j)], bb['matches' + str(j)]) = standings[j]
+        j += 1
+
+    print '----------------------------'
+    print 'Id | Name | Wins | Matches'
+    print '----------------------------'
+    j = 0
+    while j < PLAYERS:
+        print str(bb['id' + str(j)]) + " | " + str(bb['name' + str(j)]) + " | " + str(
+            bb['wins' + str(j)]) + " | " + str(bb['matches' + str(j)])
+        j += 1
+
+    return bb['name0']
+
+
 if __name__ == '__main__':
     testCount()
     testStandingsBeforeMatches()
     testReportMatches()
     testPairings()
+    showEntireSwissTournament()
     print "Success!  All tests pass!"

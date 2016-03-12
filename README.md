@@ -34,10 +34,6 @@
 ```
 
 
-
-
-
-
 # Resources
 ----------
 1. Intro to Relational Databases - Udacity course
@@ -57,6 +53,10 @@
     .gitignore
     Readme.md
 ```
+
+2. Used unittest for testing Tournament App.
+
+3. Prevent Rematches Functionality
 
 
 

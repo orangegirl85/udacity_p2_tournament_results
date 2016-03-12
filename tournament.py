@@ -4,6 +4,7 @@
 #
 
 import psycopg2
+from psycopg2 import DatabaseError
 
 
 def connect():
@@ -92,8 +93,13 @@ def reportMatch(winner, loser):
     query = "INSERT INTO {table_name}(winner, loser) VALUES (%s, %s)".format(table_name='matches')
     db_conn = connect()
     cursor = db_conn.cursor()
-    cursor.execute(query, (winner, loser))
-    db_conn.commit()
+    try:
+        cursor.execute(query, (winner, loser))
+        db_conn.commit()
+    except DatabaseError as err:
+        pass
+
+
 
 
 def swissPairings():

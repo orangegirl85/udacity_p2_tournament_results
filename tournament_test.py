@@ -8,18 +8,19 @@ from tournament import *
 from math import log
 from psycopg2 import DatabaseError
 
+
 class TournamentTestBasic(unittest.TestCase):
     def setUp(self):
         """
         Before each test we clean the database.
         We reset the matches and players.
         """
-        deleteMatches()
-        deletePlayers()
+        delete_matches()
+        delete_players()
 
     def _registerPlayers(self, players):
         for player in players:
-            registerPlayer(player)
+            register_player(player)
 
 
 class TournamentTestCount(TournamentTestBasic):
@@ -27,29 +28,29 @@ class TournamentTestCount(TournamentTestBasic):
         """
         Test player count after players deleted.
         """
-        c = self._assertCountPlayers(0, "After deletion, countPlayers should return zero.")
-        self.assertNotEqual(c, '0', "countPlayers should return numeric zero, not string '0'.")
-        print "1. countPlayers() returns 0 after initial deletePlayers() execution."
+        c = self._assertCountPlayers(0, "After deletion, count_players should return zero.")
+        self.assertNotEqual(c, '0', "count_players should return numeric zero, not string '0'.")
+        print "1. count_players() returns 0 after initial deletePlayers() execution."
 
     def testCountAfterPlayersAreRegistered(self):
         """
         Test player count after 1 and 2 players registered.
         """
-        registerPlayer("Chandra Nalaar")
-        self._assertCountPlayers(1, "After one player registers, countPlayers() should be 1.")
-        print "2. countPlayers() returns 1 after one player is registered."
+        register_player("Chandra Nalaar")
+        self._assertCountPlayers(1, "After one player registers, count_players() should be 1.")
+        print "2. count_players() returns 1 after one player is registered."
 
-        registerPlayer("Jace Beleren")
-        self._assertCountPlayers(2, "After two players register, countPlayers() should be 2.")
-        print "3. countPlayers() returns 2 after two players are registered."
+        register_player("Jace Beleren")
+        self._assertCountPlayers(2, "After two players register, count_players() should be 2.")
+        print "3. count_players() returns 2 after two players are registered."
 
-        deletePlayers()
-        self._assertCountPlayers(0, "After deletion, countPlayers should return zero.")
-        print "4. countPlayers() returns zero after registered players are deleted.\n" \
+        delete_players()
+        self._assertCountPlayers(0, "After deletion, count_players should return zero.")
+        print "4. count_players() returns zero after registered players are deleted.\n" \
               "5. Player records successfully deleted."
 
     def _assertCountPlayers(self, expected_count_players, message):
-        c = countPlayers()
+        c = count_players()
         self.assertEqual(c, expected_count_players, message + " Got {c}".format(c=c))
 
         return c
@@ -62,7 +63,7 @@ class TournamentTestStandings(TournamentTestBasic):
         to any matches being reported.
         """
         self._registerPlayers(["Melpomene Murray", "Randy Schwartz"])
-        standings = playerStandings()
+        standings = player_standings()
         self._assertStandingsLength(standings)
         self._assertStandingsValues(standings)
 
@@ -91,20 +92,20 @@ class TournamentTestTReportMatches(TournamentTestBasic):
         """
         self._registerPlayers(["Bruno Walton", "Boots O'Neal", "Cathy Burton", "Diane Grant"])
 
-        standings = playerStandings()
+        standings = player_standings()
         [id1, id2, id3, id4] = [row[0] for row in standings]
-        reportMatch(id1, id2)
-        reportMatch(id3, id4)
+        report_match(id1, id2)
+        report_match(id3, id4)
         self._assertStandingsValuesAfterFirstRound(id1, id2, id3, id4)
         print "7. After a match, players have updated standings."
 
-        deleteMatches()
+        delete_matches()
         self._assertStandingsValuesAfterDeleteMatches()
         print "8. After match deletion, player standings are properly reset."
         print "9. Matches are properly deleted."
 
     def _assertStandingsValuesAfterFirstRound(self, id1, id2, id3, id4):
-        standings = playerStandings()
+        standings = player_standings()
         for (i, n, w, m) in standings:
             self.assertEqual(m, 1, "Each player should have one match recorded.")
             if i in (id1, id3):
@@ -113,12 +114,13 @@ class TournamentTestTReportMatches(TournamentTestBasic):
                 self.assertTrue(w == 0, "Each match loser should have zero wins recorded.")
 
     def _assertStandingsValuesAfterDeleteMatches(self):
-        standings = playerStandings()
+        standings = player_standings()
         self.assertEqual(len(standings), 4, "Match deletion should not change number of players in standings.")
 
         for (i, n, w, m) in standings:
             self.assertEqual(m, 0, "After deleting matches, players should have zero matches recorded.")
             self.assertEqual(w, 0, "After deleting matches, players should have zero wins recorded.")
+
 
 class TournamentTestU(TournamentTestBasic):
     def testPairings(self):
@@ -129,7 +131,7 @@ class TournamentTestU(TournamentTestBasic):
                    "Rainbow Dash", "Princess Celestia", "Princess Luna"]
         self._registerPlayers(players)
 
-        standings = playerStandings()
+        standings = player_standings()
         [id1, id2, id3, id4, id5, id6, id7, id8] = [row[0] for row in standings]
         self._assertPairingsLength()
 
@@ -141,16 +143,16 @@ class TournamentTestU(TournamentTestBasic):
         print "10. After one match, players with one win are properly paired."
 
     def _assertPairingsLength(self):
-        pairings = swissPairings()
+        pairings = swiss_pairings()
         self.assertEqual(len(pairings), 4, "For eight players, swissPairings should return 4 pairs. Got {pairs}".format(
             pairs=len(pairings)))
         return pairings
 
     def _registerMachesFirstRound(self, id1, id2, id3, id4, id5, id6, id7, id8):
-        reportMatch(id1, id2)
-        reportMatch(id3, id4)
-        reportMatch(id5, id6)
-        reportMatch(id7, id8)
+        report_match(id1, id2)
+        report_match(id3, id4)
+        report_match(id5, id6)
+        report_match(id7, id8)
 
     def _assertPairingsAfterFirstRound(self, pairings, id1, id2, id3, id4, id5, id6, id7, id8):
         [(pid1, pname1, pid2, pname2), (pid3, pname3, pid4, pname4), (pid5, pname5, pid6, pname6),
@@ -167,49 +169,49 @@ class TournamentTestU(TournamentTestBasic):
         for pair in actual_pairs:
             self.assertIn(pair, possible_pairs, "After one match, players with one win should be paired.")
 
+
 class TournamentTestZExtras(TournamentTestBasic):
     def testPreventRematches(self):
         self._registerPlayers(["Bruno Walton", "Boots O'Neal", "Cathy Burton", "Diane Grant"])
 
-        standings = playerStandings()
+        standings = player_standings()
         [id1, id2, id3, id4] = [row[0] for row in standings]
-        reportMatch(id1, id2)
-        reportMatch(id3, id4)
-        self.assertRaises(DatabaseError, reportMatch(id2, id1))
-        self.assertRaises(DatabaseError, reportMatch(id2, id2))
+        report_match(id1, id2)
+        report_match(id3, id4)
+        self.assertRaises(DatabaseError, report_match(id2, id1))
+        self.assertRaises(DatabaseError, report_match(id2, id2))
         print "11. Rematches are properly prevented."
 
 
-
 class SwissTournament(object):
-    PLAYERS = 16
+    PLAYERS = 32
 
-    def showEntireSwissTournament(self):
+    def generate_whole_swiss_tournament(self):
         """
         Show each round in a swiss tournament
         """
-        deleteMatches()
-        deletePlayers()
+        global first_player
+        delete_matches()
+        delete_players()
 
         i = 0
         while i < self.PLAYERS:
-            registerPlayer("Player " + str(i + 1))
+            register_player("Player " + str(i + 1))
             i += 1
-        print 'Stats before tournament:'
-        self.stats()
 
         rounds = log(self.PLAYERS) / log(2)
         i = 0
         while i < int(rounds):
-            pairings = swissPairings()
+            pairings = swiss_pairings()
             group = {}
 
             j = 0
             z = 0
             while j < self.PLAYERS:
-                (group['pid' + str(j)], group['pname' + str(j)], group['pid' + str(j + 1)], group['pname' + str(j + 1)]) = pairings[
+                (group['pid' + str(j)], group['pname' + str(j)], group['pid' + str(j + 1)],
+                 group['pname' + str(j + 1)]) = pairings[
                     z]
-                reportMatch(group['pid' + str(j)], group['pid' + str(j + 1)])
+                report_match(group['pid' + str(j)], group['pid' + str(j + 1)])
                 j += 2
                 z += 1
 
@@ -221,12 +223,18 @@ class SwissTournament(object):
         print "The winner is: " + first_player
 
     def stats(self):
-        standings = playerStandings()
+        """
+
+        Returns:
+            object:
+        """
+        standings = player_standings()
         group = {}
 
         j = 0
         while j < self.PLAYERS:
-            (group['id' + str(j)], group['name' + str(j)], group['wins' + str(j)], group['matches' + str(j)]) = standings[j]
+            (group['id' + str(j)], group['name' + str(j)], group['wins' + str(j)], group['matches' + str(j)]) = \
+                standings[j]
             j += 1
 
         print '----------------------------'
@@ -243,5 +251,5 @@ class SwissTournament(object):
 
 if __name__ == '__main__':
     tournament = SwissTournament()
-    tournament.showEntireSwissTournament()
+    tournament.generate_whole_swiss_tournament()
     unittest.main()

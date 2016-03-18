@@ -38,8 +38,8 @@
 ----------
 1. Intro to Relational Databases - Udacity course
 
-2. swissPairings functionality inspired by
-  `http://stackoverflow.com/questions/19218458/how-to-retrieve-even-rows-in-a-table`
+2. `find_shortest_path` inspired by `https://www.python.org/doc/essays/graphs/`
+
 
 
 # Extras
@@ -47,16 +47,18 @@
 1. Project Structure
 ```
 /tournament_nico
+    .gitignore
+    Readme.md
     tournament.py
     tournament.sql
     tournament_test.py
-    .gitignore
-    Readme.md
 ```
 
 2. Used unittest for testing Tournament App.
 
 3. Prevent Rematches Functionality
+
+4. Added generate_whole_swiss_tournament
 
 
 

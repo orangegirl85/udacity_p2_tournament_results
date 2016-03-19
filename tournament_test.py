@@ -19,6 +19,13 @@ class TournamentTestBasic(unittest.TestCase):
         delete_players()
 
     def _registerPlayers(self, players):
+        """
+        Registers a list of players in the database
+
+        Args:
+            players
+
+        """
         for player in players:
             register_player(player)
 
@@ -26,7 +33,7 @@ class TournamentTestBasic(unittest.TestCase):
 class TournamentTestCount(TournamentTestBasic):
     def testCountAfterPlayersAreDeleted(self):
         """
-        Test player count after players deleted.
+        Test player count after players are deleted.
         """
         c = self._assertCountPlayers(0, "After deletion, count_players should return zero.")
         self.assertNotEqual(c, '0', "count_players should return numeric zero, not string '0'.")
@@ -135,7 +142,7 @@ class TournamentTestU(TournamentTestBasic):
         [id1, id2, id3, id4, id5, id6, id7, id8] = [row[0] for row in standings]
         self._assertPairingsLength()
 
-        self._registerMachesFirstRound(id1, id2, id3, id4, id5, id6, id7, id8)
+        self._registerMatchesFirstRound(id1, id2, id3, id4, id5, id6, id7, id8)
 
         pairings = self._assertPairingsLength()
         self._assertPairingsAfterFirstRound(pairings, id1, id2, id3, id4, id5, id6, id7, id8)
@@ -148,7 +155,7 @@ class TournamentTestU(TournamentTestBasic):
             pairs=len(pairings)))
         return pairings
 
-    def _registerMachesFirstRound(self, id1, id2, id3, id4, id5, id6, id7, id8):
+    def _registerMatchesFirstRound(self, id1, id2, id3, id4, id5, id6, id7, id8):
         report_match(id1, id2)
         report_match(id3, id4)
         report_match(id5, id6)
@@ -172,6 +179,9 @@ class TournamentTestU(TournamentTestBasic):
 
 class TournamentTestZExtras(TournamentTestBasic):
     def testPreventRematches(self):
+        """
+        Test that the system does not allow rematches or matches between a player and himself
+        """
         self._registerPlayers(["Bruno Walton", "Boots O'Neal", "Cathy Burton", "Diane Grant"])
 
         standings = player_standings()
@@ -184,69 +194,78 @@ class TournamentTestZExtras(TournamentTestBasic):
 
 
 class SwissTournament(object):
-    PLAYERS = 32
+    NR_OF_PLAYERS = 16
 
     def generate_whole_swiss_tournament(self):
         """
-        Show each round in a swiss tournament
+        Display each round statistics in a swiss tournament.
+        Display winner's name.
         """
-        global first_player
+
+        # clean database
         delete_matches()
         delete_players()
 
+        print '\n\nSWISS TOURNAMENT FOR {0} PLAYERS:'.format(self.NR_OF_PLAYERS)
+
+        # register {NR_OF_PLAYERS} players
         i = 0
-        while i < self.PLAYERS:
+        while i < self.NR_OF_PLAYERS:
             register_player("Player " + str(i + 1))
             i += 1
 
-        rounds = log(self.PLAYERS) / log(2)
+        # calculate nr of rounds necessary to determine a winner
+        rounds = log(self.NR_OF_PLAYERS) / log(2)
         i = 0
         while i < int(rounds):
+            # determine next round matches
             pairings = swiss_pairings()
             group = {}
 
             j = 0
             z = 0
-            while j < self.PLAYERS:
+            # register next round matches
+            while j < self.NR_OF_PLAYERS:
                 (group['pid' + str(j)], group['pname' + str(j)], group['pid' + str(j + 1)],
-                 group['pname' + str(j + 1)]) = pairings[
-                    z]
+                 group['pname' + str(j + 1)]) = pairings[z]
                 report_match(group['pid' + str(j)], group['pid' + str(j + 1)])
                 j += 2
                 z += 1
 
-            print ''
-            print 'Stats after round:' + str(i + 1)
+            print '\nStats after round: ' + str(i + 1)
+
+            # show round statistics
             first_player = self.stats()
+            print '\n'
             i += 1
 
-        print "The winner is: " + first_player
+        print "-------------------------"
+        print "THE WINNER IS: " + first_player + "."
+        print "-------------------------\n\n"
 
     def stats(self):
         """
+        Display player_standings
+
+         Id | Name | Wins | Matches
+         1 | Player 1 | 1 | 1
+         2 | Player 2 | 0 | 1
 
         Returns:
-            object:
+            first player's name
         """
         standings = player_standings()
-        group = {}
-
-        j = 0
-        while j < self.PLAYERS:
-            (group['id' + str(j)], group['name' + str(j)], group['wins' + str(j)], group['matches' + str(j)]) = \
-                standings[j]
-            j += 1
 
         print '----------------------------'
         print 'Id | Name | Wins | Matches'
         print '----------------------------'
         j = 0
-        while j < self.PLAYERS:
-            print str(group['id' + str(j)]) + " | " + str(group['name' + str(j)]) + " | " + str(
-                group['wins' + str(j)]) + " | " + str(group['matches' + str(j)])
+        while j < self.NR_OF_PLAYERS:
+            print str(standings[j][0]) + " | " + str(standings[j][1]) + " | " + str(
+                standings[j][2]) + " | " + str(standings[j][3])
             j += 1
 
-        return group['name0']
+        return standings[0][1]
 
 
 if __name__ == '__main__':

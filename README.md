@@ -2,7 +2,7 @@
 ------------------------
 
     * This is a Python application that uses PostgreSQL database to keep track of players
-    and matches in a game tournament.
+    and matches in a swiss game tournament.
 
 
 # Prerequisites
@@ -18,10 +18,16 @@
 # Run App for Mac users
 -----------------------
 1. Launch the Vagrant VM
+```
+    vagrant up
+    vagrant ssh
+```
 
-2. Navigate to tournament_nico folder: cd /vagrant/tournament_nico
+2. Navigate to tournament_nico folder:
 
-3. Create database and tables for the project:
+`cd /vagrant/tournament_nico`
+
+3. Create tournament database and connect to it
 
 ```
    psql
@@ -30,15 +36,34 @@
 
    \c tournament
 
-   \i tournament.sql
 ```
+
+4. Import tournament.sql in order to create the tables and the views for the project:
+
+```
+    \i tournament.sql
+```
+
+5. Connect in other terminal tab to the virtual machine
+```
+    vagrant ssh
+```
+
+6. Navigate to tournament_nico folder:
+
+`cd /vagrant/tournament_nico`
+
+7. Run app
+
+`python tournament_test.py`
+
 
 
 # Resources
 ----------
 1. Intro to Relational Databases - Udacity course
 
-2. `find_shortest_path` inspired by `https://www.python.org/doc/essays/graphs/`
+2. `find_path` inspired by `https://www.python.org/doc/essays/graphs/`
 
 
 
@@ -58,7 +83,16 @@
 
 3. Prevent Rematches Functionality
 
-4. Added generate_whole_swiss_tournament
+4. Added generate_whole_swiss_tournament in tournament_test.py
+
+
+# Other
+--------
+
+The algorithm for determining the swiss_pairings is not optimal.
+The optimal next matches between players with equal or nearly-equal win record
+should be determined in `find_path` not `_get_next_matches_ids`.
+
 
 
 

@@ -147,15 +147,26 @@ def swiss_pairings():
     names, wins = _get_names_and_wins(standings)
     graph = _build_graph(possible_matches, wins)
 
-    minimum_spanning_tree = _get_next_matches_ids(graph)
+    shortest_path = _get_next_matches_ids(graph)
 
     next_matches = []
-    for mst in minimum_spanning_tree:
-        next_matches.append((mst[1], names[mst[1]], mst[2], names[mst[2]]))
+    for shp in shortest_path:
+        next_matches.append((shp[1], names[shp[1]], shp[2], names[shp[2]]))
     return next_matches
 
 
 def _get_possible_matches_for_next_round(standings):
+    """Returns possible next matches for next round.
+
+    Args:
+        standings: actual standings for each player
+
+    Returns:
+        A dictionary with possible next matches for each player
+        {id1: [id2, id3, ...], id2: [id1, id4, id5...], ...}
+
+        idn: a player's unique id
+    """
     possible_matches = {}
 
     for (id_player, name, win, matches) in standings:
@@ -172,11 +183,22 @@ def _get_possible_matches_for_next_round(standings):
             """
         results = fetch_all(query, (id_player, id_player, id_player))
         possible_matches[id_player] = [res[0] for res in results]
-
     return possible_matches
 
 
 def _get_names_and_wins(standings):
+    """Returns 2 dictionaries: one with nr of wins and the other with names of the players.
+
+    Args:
+        standings: actual standings for each player
+
+    Returns:
+        2 lists:
+        wins = {'id1': 2, 'id2': 1, ...}
+        names = {'id1': 'Player 1', 'id2': 'Player 2', ...}
+
+        idn: a player's unique id
+    """
     wins = {}
     names = {}
     for (i, n, w, m) in standings:
@@ -187,6 +209,20 @@ def _get_names_and_wins(standings):
 
 
 def _build_graph(possible_matches, wins):
+    """Returns a list with all combinations of possible next matches and their weight.
+
+    Args:
+        possible_matches
+        wins: used to calculate weight of a match
+
+    Returns:
+        A list of tuples: [(weight1, id1, id2), (weight2, id1, id4), ...]
+
+        weightn: the difference of wins between id1 and id2
+        idn: a player's unique id
+
+        The list is sorted after weight
+    """
     graph = []
     for id_player1 in possible_matches:
         for id_player2 in possible_matches[id_player1]:
@@ -197,18 +233,48 @@ def _build_graph(possible_matches, wins):
 
 
 def _get_next_matches_ids(graph):
+    """ Finds next pairs of matches taking considering the win record of the players
+
+    Args:
+        graph: a list of tuples that contains every possible next match
+
+    Returns:
+        set([(weight1, id1, id2), (weight2, id3, id4), ...])
+
+        weightn: the difference of wins between id1 and id2
+        idn: a player's unique id
+    """
     count_p = count_players()
-    count, minimum_spanning_tree = find_shortest_path(graph, graph[0], count_p, [], set())
-    i = 0
-    while len(minimum_spanning_tree) != (count_p / 2):
-        i += 1
-        count, minimum_spanning_tree = find_shortest_path(graph, graph[i], count_p, [], set())
 
-    # print 'Weight' + str(count)
-    return minimum_spanning_tree
+    paths = []
+    for i in range(len(graph)):
+        count, path = find_path(graph, graph[i], count_p, [], set())
+        if len(path) == (count_p / 2):
+            paths.append((count, path))
+
+    # Chose the path that has minimum weight
+    paths.sort()
+    chosen_path = paths[0][1]
+
+    return chosen_path
 
 
-def find_shortest_path(graph, start, nr_players, nodes, path=set(), count=0):
+def find_path(graph, start, nr_players, nodes, path=set(), count=0):
+    """
+
+    Args:
+        graph: all possible matches
+        start: chosen starting match
+        nr_players: number of players
+        nodes: a list with all players from chosen matches
+        path: a list with chosen matches
+        count: the sum of all chosen matches weights
+
+    Returns:
+        count/new_count - the sum of all chosen matches weights
+        path/new_path  - a list with all matches
+
+    """
     weight, id_player1, id_player2 = start
     nodes.append(id_player1)
     nodes.append(id_player2)
@@ -217,14 +283,11 @@ def find_shortest_path(graph, start, nr_players, nodes, path=set(), count=0):
 
     if len(nodes) == nr_players:
         return count, path
-    shortest = set()
     for edge in graph:
         weight1, id_player1, id_player2 = edge
         if id_player1 not in nodes and id_player2 not in nodes:
-            new_count, new_path = find_shortest_path(graph, edge, nr_players, nodes, path, count)
+            new_count, new_path = find_path(graph, edge, nr_players, nodes, path, count)
             if new_path:
-                if len(shortest) == 0 or new_count < count:
-                    shortest = new_path
-                    count = new_count
+                return new_count, new_path
 
-    return count, shortest
+    return 0, set()

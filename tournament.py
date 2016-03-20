@@ -24,8 +24,8 @@ def execute(query, values=()):
     try:
         cursor.execute(query, values)
         db_conn.commit()
-    except DatabaseError:
-        pass
+    except DatabaseError as e:
+        print e.message
     db_conn.close()
 
 
@@ -64,19 +64,19 @@ def fetch_all(query, values=()):
 
 def delete_matches():
     """Remove all the match records from the database."""
-    query = "DELETE FROM {table_name}".format(table_name='matches')
+    query = "DELETE FROM matches"
     execute(query)
 
 
 def delete_players():
     """Remove all the player records from the database."""
-    query = "DELETE FROM {table_name}".format(table_name='players')
+    query = "DELETE FROM players"
     execute(query)
 
 
 def count_players():
     """Return the number of players currently registered."""
-    query = "SELECT COUNT(id) FROM {table_name}".format(table_name='players')
+    query = "SELECT COUNT(id) FROM players"
     return fetch_one(query)
 
 
@@ -89,8 +89,7 @@ def register_player(name):
     Args:
       name: the player's full name (need not be unique).
     """
-    query = "INSERT INTO {table_name}(name) VALUES (%s)".format(
-        table_name='players')
+    query = "INSERT INTO players(name) VALUES (%s)"
     execute(query, (name,))
 
 
@@ -123,8 +122,7 @@ def report_match(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
-    query = "INSERT INTO {table_name}(winner, loser) VALUES (%s, %s)".format(
-        table_name='matches')
+    query = "INSERT INTO matches(winner, loser) VALUES (%s, %s)"
     execute(query, (winner, loser))
 
 

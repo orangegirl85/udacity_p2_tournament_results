@@ -27,33 +27,24 @@
 
 `cd /vagrant/tournament_nico`
 
-3. Create tournament database and connect to it
+
+3. Import tournament.sql in order to create the database, the tables and the views for the project:
 
 ```
-   psql
-
-   CREATE DATABASE tournament;
-
-   \c tournament
-
-```
-
-4. Import tournament.sql in order to create the tables and the views for the project:
-
-```
+    psql
     \i tournament.sql
 ```
 
-5. Connect in other terminal tab to the virtual machine
+4. Connect in other terminal tab to the virtual machine
 ```
     vagrant ssh
 ```
 
-6. Navigate to tournament_nico folder:
+5. Navigate to tournament_nico folder:
 
 `cd /vagrant/tournament_nico`
 
-7. Run app
+6. Run app
 
 `python tournament_test.py`
 

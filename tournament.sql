@@ -1,12 +1,12 @@
 -- Table and Views definitions for the tournament project.
 
 
--- CLEAN DATABASE: DROP VIEWS AND TABLES
-DROP VIEW IF EXISTS view_player_id_name_won_matches;
-DROP VIEW IF EXISTS view_player_matches;
-DROP TABLE IF EXISTS matches;
-DROP TABLE IF EXISTS players;
+-- DROP DATABASE
+DROP DATABASE IF EXISTS tournament;
 
+CREATE DATABASE tournament;
+
+\c tournament;
 
 -- CREATE players TABLE
 CREATE TABLE players(id SERIAL PRIMARY KEY, name TEXT);
